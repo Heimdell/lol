@@ -177,7 +177,11 @@ def many(p):
 # parses 1+ occurences of the given parser
 # not a proper implementation, consumes stack
 def many1(p):
-    return (listOf & p & many(p)).map(lambda pile: [pile[0]] + pile[1])
+    return (
+        p      .bind(lambda x: (
+        many(p).bind(lambda xs: (
+        pure([x] + xs)))))
+    )
 
 import re
 
@@ -215,4 +219,4 @@ test = (
 
 stream = Tokenizer().run("-", "lol(ror -> lal kek)")
 
-print(test.run(stream))
+# print(test.run(stream))
