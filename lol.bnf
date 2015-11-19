@@ -6,6 +6,7 @@ program
     | "(" complex-expr ")"
     | let-binding
     | let-rec-binding
+    | data-decl
 
 let-binding     = "let"     binding
 let-rec-binding = "let-rec" binding
@@ -15,3 +16,7 @@ binding = VAR "=" program "in" program
 complex-expr 
     = [VAR] "->" program
     | [program]
+
+data-decl       ::= "data" data-decl-inner "in" program
+data-decl-inner ::= name "=" ctors {"and" data-decl-inner}
+ctors           ::= name [name] {"or" ctors}
