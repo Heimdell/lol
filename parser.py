@@ -128,6 +128,12 @@ class Parser:
 
         return Parser(act)
 
+def vararg(f):
+    def it(xs):
+        return f(*xs)
+
+    return it
+
 def at(stream):
     return stream[0].pos if stream else "at the very end"
 
