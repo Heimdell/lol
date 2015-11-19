@@ -48,8 +48,8 @@ def combine(a, b):
 
 # wrapper around some (list(Token) -> ParseResult) function
 class Parser:
-    def __init__(self, action):
-        self.action = action
+    def __init__(self, run):
+        self.run = run
 
     # run self, replace result with "x"
     def produces(me, x):
@@ -74,10 +74,6 @@ class Parser:
             return Expected([x], stream[0].pos if stream else "at the very end")
 
         return Parser(act)
-
-    # run self on some token list
-    def run(self, stream):
-        return self.action(stream)
 
     # bind a callback (producing some new parser from current result) to self
     def bind(self, callback):
@@ -172,7 +168,7 @@ listOf = pure([])
 # parses 0+ occurences of the given parser
 # not a proper implementation, consumes stack
 def many(p):
-    return recursive(lambda: many1(p) | pure([]))
+    return many1(p) | pure([])
 
 # parses 1+ occurences of the given parser
 # not a proper implementation, consumes stack
@@ -195,6 +191,8 @@ def regexp(reg):
             return Expected([reg], at(stream))
 
     return Parser(act)
+
+getPosition = Parser(lambda stream: Ok(at(stream), stream))
 
 reserved_words = ["let", "let-rec", "=", "in", "(", ")", "->"]
 

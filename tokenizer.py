@@ -98,6 +98,13 @@ class Tokenizer:
                         break
                 self.push('"')
 
+            elif char in ["#"]:
+                self.push("")
+                while char != '\n':
+                    self.finish += 1
+                    char = self.text[self.finish]
+                self.reset()
+
             else:
                 self.count(char)
 
@@ -106,3 +113,5 @@ class Tokenizer:
         self.push("")
 
         return self.tokens
+
+# print(list(map(str, Tokenizer().file("test.lol"))))
