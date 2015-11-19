@@ -37,7 +37,7 @@ class Expected(ParseResult):
     def __str__(me):
         return "Expected(" + str(me.faults) + ", " + str(me.where) + ")"
 
-# accumulate to tiple or list
+# accumulate to tuple or list
 def combine(a, b):
     if isinstance(a, list):
         return a + [b]
@@ -145,7 +145,7 @@ def pure(x):
 def fail(x):
     return Parser(lambda stream: Expected([x], at(stream)))
 
-# check is the "token" is next in the stream. Put it out & return
+# check if the "token" is next in the stream. Put it out & return
 def the(token):
     def act(stream):
         if stream and stream[0].text == token:
