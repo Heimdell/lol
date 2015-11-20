@@ -98,7 +98,7 @@ term = atPoint(lambda point:
     )
 )
 
-while_program = (
+whole_program = (
     (listOf 
         & program 
         & eof)
@@ -109,4 +109,4 @@ while_program = (
 
 ts = Tokenizer().file("test.lol")
 
-print(while_program.run(ts))
+print(whole_program.run(ts))
