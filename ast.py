@@ -23,7 +23,8 @@ class Var(Ast):
         me.name = name
 
     def __str__(me):
-        return me.name
+        # for debug reasons
+        return "$" + me.name
 
 class Const(Ast):
     def __init__(me, info, value):
@@ -31,7 +32,8 @@ class Const(Ast):
         me.value = value
 
     def __str__(me):
-        return str(me.value)
+        # for debug reasons
+        return "#" + str(me.value)
 
 class Function(Ast):
     def __init__(me, info, args, body):

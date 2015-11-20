@@ -1,9 +1,19 @@
-let add = (x y -> (+ x y)) in
+let uncons = list ret ->
+    ret (fst list) (rest list)
+in
 
-let curry = (f x -> (y -> (f x y))) in
+let x =
+    uncons (list 1 2) (head tail ->
+    ++ tail (list head))
+in
 
-let-rec om-nom-nom! = (_ -> om-nom-nom!) in
+let add = x y -> + x y in
 
-let test = (curry add "1") in
+let curry = f x -> y -> f x y in
 
-(print (test 2) (_ -> halt))
+# comment
+let om-nom-nom! = rec (self -> _ -> self) in
+
+let test = curry add "1" in
+
+print (test 2) (_ -> halt ())

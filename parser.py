@@ -1,6 +1,35 @@
 
 from tokenizer import *
 
+'''
+    Later, 'X will parse Y' means the parser X will succeed 
+        on parsing Tokenizer().run(Y)
+
+    Small howto:
+        the("x")   will parse token "x"
+        the("<?>") will parse token "<?>"
+        the("()")  will parse nothing - tokenizer splits by spaces and ()
+
+        many(the("x"))  will parse "a b c" returning [] - no "x"s there
+        many1(the("x")) will not parse "a b c" - it requires at least 1 success
+        many(the("x"))  will parse "x x c" returning ["x", "x"]
+
+        (listOf & the("x") & the("y")) will parse "x y" returning ["x", "y"]
+        the("x") & the("y") will produce error - the first elem of &-separated
+            expression must be a listOf OR list/tuple-returning parser
+
+        (the("x") | the("y")) will parse both "x a b" and "y c d"
+
+        (listOf("?") & name & the("??") & name)
+            .map(vararg(lambda _, name1, _1, name2: (name1, name2)))
+
+            will parse "? a ?? b" returning ("a", "b")
+
+        the("sheed").producing("shit") will parse "sheed" returning "shit"
+
+        regexp("[0-9][0-9]*") will parse any numeric constant
+'''
+
 class ParseResult:
     pass
 
@@ -50,6 +79,19 @@ def combine(a, b):
 class Parser:
     def __init__(self, run):
         self.run = run
+
+    # tries parser; if it consumes & fails, it makes it look like
+    #  no consumption was done
+    def retract(me):
+        def act(stream):
+            res = me.run(stream)
+
+            if not res.isOk():
+                res.where = at(stream)
+
+            return res
+
+        return Parser(act)
 
     # run self, replace result with "x"
     def produces(me, x):
@@ -109,13 +151,14 @@ class Parser:
 
         return Parser(act)
 
-    # run self; if it fails - run "other"
+    # run self; if it fails AND CONSUMES NOTHING - run "other"
     # collect the faults from farthest attempt
     def __or__(self, other):
         def act(stream):
             res = self.run(stream)
 
-            if res.isOk():
+            # check if we succeed or consumed
+            if res.isOk() or res.where != at(stream):
                 return res
 
             res2 = other.run(stream)
@@ -174,7 +217,7 @@ listOf = pure([])
 # parses 0+ occurences of the given parser
 # not a proper implementation, consumes stack
 def many(p):
-    return many1(p) | pure([])
+    return many1(p).retract() | pure([])
 
 # parses 1+ occurences of the given parser
 # not a proper implementation, consumes stack
@@ -184,6 +227,9 @@ def many1(p):
         many(p).bind(lambda xs: (
         pure([x] + xs)))))
     )
+
+# parses an end of file
+eof = Parser(lambda stream: Ok(None, stream) if not stream else Expected("eof", at(stream)))
 
 import re
 
@@ -200,27 +246,4 @@ def regexp(reg):
 
 getPosition = Parser(lambda stream: Ok(at(stream), stream))
 
-reserved_words = ["let", "let-rec", "=", "in", "(", ")", "->"]
-
-def gen_name_parser():
-    def act(tokens):
-        if tokens and not tokens[0].text in reserved_words:
-            return Ok(tokens[0].text, tokens[1:])
-        else:
-            return Expected(["name"], at(tokens))
-
-    return Parser(act)
-
-name = gen_name_parser()
-
-test = (
-    listOf
-        & name
-        & the("(")
-        & many( name | the("->").produces("ARROW") )
-        & the(")")
-)
-
-stream = Tokenizer().run("-", "lol(ror -> lal kek)")
-
-# print(test.run(stream))
+atPoint = getPosition.bind
