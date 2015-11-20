@@ -20,7 +20,7 @@ from tokenizer import *
 
         (the("x") | the("y")) will parse both "x a b" and "y c d"
 
-        (listOf("?") & name & the("??") & name)
+        (listOf & the("?") & name & the("??") & name)
             .map(vararg(lambda _, name1, _1, name2: (name1, name2)))
 
             will parse "? a ?? b" returning ("a", "b")
