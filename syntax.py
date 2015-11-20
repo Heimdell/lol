@@ -35,7 +35,7 @@ let_block = atPoint(lambda point: (
     )))
 ))
 
-# complex is a apllication (print 1 2) or a lambda (x y -> x)
+# complex is an apllication (print 1 2) or a lambda (x y -> x)
 complex = recursive(lambda: (
     (listOf
         # parse many prefixes of the form "x y ->""
