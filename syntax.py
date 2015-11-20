@@ -93,7 +93,7 @@ term = atPoint(lambda point:
         .map(lambda name: Var(point, name))
     
     | (listOf & the("(") & program & the(")"))
-        .called("expression in bracket")
+        .called("expression in brackets")
         .map(vararg(lambda _, it, _1: it))
     )
 )
