@@ -229,7 +229,7 @@ def many1(p):
     )
 
 # parses an end of file
-eof = Parser(lambda stream: Ok(None, stream) if not stream else Expected("eof", at(stream)))
+eof = Parser(lambda stream: Ok(None, stream) if not stream else Expected("to close parenthesis open at", at(stream)))
 
 import re
 
