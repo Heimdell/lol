@@ -12,4 +12,4 @@ in
 
 print x ;
 print x ;
-halt
+halt ()
