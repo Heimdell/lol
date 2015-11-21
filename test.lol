@@ -1,7 +1,7 @@
 
 let ` = list in
 
-# perfrom case-analisys on list
+# perfom case-analisys on list
 let case-list? =
     -> list on-nil on-cons ;
     ? (null? list)
@@ -24,14 +24,14 @@ in
 
 # uncurry the function
 let uncurried =
-    -> f ;   # get the function
+    -> f   ; # get the function
     -> x y ; # get all args
     (f x) y  # feed them by one
 in
 
 # uncurry the function
 let uncurried3 =
-    -> f ;     # get the function
+    -> f     ; # get the function
     -> x y z ; # get all args
     (f x) y z  # feed them by one
 in
@@ -39,7 +39,7 @@ in
 # glue an x in front of xs
 let cons =
     -> x xs ;
-    ++ (list x) xs
+    ++ (` x) xs
 in
 
 let map = uncurried # "rec" separates arguments, making it curried
@@ -57,7 +57,7 @@ let foldl = uncurried3
         -> f    ;
     rec -> self ;
         -> zero
-           lst ;
+           lst  ;
     case-list? lst
         (       ; zero)
         (-> h t ; self (f zero h) t)
@@ -85,28 +85,22 @@ let . =
     f (g x)
 in
 
-let .: =
-    -> f g ;
-    -> x y ;
-    f (g x) (g y)
-in
-
 # compose N functions
 let ... =
-    folds-args . -> x ; x
+    folds-args . (-> x ; x)
 in
 
 let x =
     map (... (_ + 1) (_ + 2) (_ + 3))
-        (list 1 2 3)
+        (` 1 2 3)
 in
 
 let y =
-    foldl + 0 (list 1 2 3)
+    foldl + 0 (` 1 2 3)
 in
 
 let z = 
-    reversed (list 1 2 3)
+    reversed (` 1 2 3)
 in
 
 let put =
@@ -114,9 +108,9 @@ let put =
     print (foldl + "" lst) ret
 in
 
-put (` "x = " x) ; # prints [ 2, 3, 4 ]
-put (` "y = " y) ; # prints 6
-put (` "z = " z) ; # prints [ 3, 2, 1 ]
+put (` "x = " (s x)) ;
+put (` "y = " y) ;
+put (` "z = " (s z)) ;
 put (` "(sum 1 2 3 4) = " (sum 1 2 3 4)) ;
-put (` "(apply sum (list 1 2 3 4) = " (apply sum (list 1 2 3 4))) ;
+put (` "(apply sum (` 1 2 3 4) = " (apply sum (` 1 2 3 4))) ;
 halt ()
