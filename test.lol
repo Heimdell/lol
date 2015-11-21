@@ -7,4 +7,6 @@ let x =
     ++ tail (list head))
 in
 
-print x
+print x (_ ->
+print x (_ ->
+halt))

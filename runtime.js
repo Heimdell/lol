@@ -19,7 +19,11 @@ var _plus_plus = function(x, y) {
     return x.concat(y)
 }
 
-var print = function (x) {
+var print = function (x, ret) {
     console.log(x)
+    return ret()
+}
+
+var halt = function() {
     return null
 }
