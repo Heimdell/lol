@@ -67,8 +67,31 @@ let reversed =
     foldl (flip cons) () list
 in
 
+# vararg function, calling foldl on its arglist
+let folds-args =
+           -> op zero ; # receive config
+    vararg -> list    ; # reveive arg list
+    foldl op zero list
+in
+
+# vararg-sum
+let sum = folds-args + 0 in
+
+# compose 2 functions
+let . =
+    -> f g ;
+    -> x   ;
+    f (g x)
+in
+
+# compose N functions
+let ... =
+    folds-args . -> x ; x
+in
+
 let x =
-    map (_ + 1) (list 1 2 3)
+    map (... (_ + 1) (_ + 2) (_ + 3))
+        (list 1 2 3)
 in
 
 let y =
@@ -82,4 +105,5 @@ in
 print x ; # prints [ 2, 3, 4 ]
 print y ; # prints 6
 print z ; # prints [ 3, 2, 1 ]
+print (sum 1 2 3 4) ;
 halt ()

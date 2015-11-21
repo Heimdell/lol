@@ -60,3 +60,12 @@ function rec(f) {
     })
 }
 
+var vararg = function(f) {
+    return function() {
+        args = []
+        for (var i = 0; i < arguments.length; i++) {
+            args.push(arguments[i])
+        };
+        return f(args)
+    }
+}
