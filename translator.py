@@ -5,6 +5,8 @@ from operator  import *
 from ast       import *
 from utils     import *
 
+js_keywords = open("js_keywords").read().split()
+
 known_ops = {
     "+": "plus",
     "@": "doge",
@@ -33,7 +35,10 @@ def convert_char(char):
 safe = lambda op: lambda x, y: op(x, y) if x else y
 
 def convert_name(name):
-    return reduce(safe(add), map(convert_char, name))
+    if name in js_keywords:
+        return "_" + name
+    else:
+        return reduce(safe(add), map(convert_char, name))
 
 def wrapWithCurlyBracets(string):
     return "(function() { " + string + "}) ()"
@@ -52,7 +57,7 @@ def convert_ast(ast):
 
     if of(Function, ast):
         return (
-              "function (" + unwordsWith(",", ast.args)
+              "function (" + unwordsWith(",", map(convert_name, ast.args))
             + ") { return " + convert_ast(ast.body) 
             + " }"
         )
