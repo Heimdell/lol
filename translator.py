@@ -19,14 +19,15 @@ known_ops = {
     ">": "more",
     "<": "less",
     "_": "hole",
-    ".": "dude"
+    ".": "dude",
+    "`": "quote"
 }
 
 def convert_char(char):
     if char in known_ops:
         return "_" + known_ops[char]
     
-    if char >= 'A' and char <= 'z':
+    if char >= 'A' and char <= 'Z' or char >= 'a' and char <= 'z':
         return char
 
     return "_" + str(ord(char))
