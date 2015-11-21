@@ -1,4 +1,6 @@
 
+let ` = list in
+
 # perfrom case-analisys on list
 let case-list? =
     -> list on-nil on-cons ;
@@ -55,9 +57,8 @@ let foldl = uncurried3
         -> f    ;
     rec -> self ;
         -> zero
-           list ;
-
-    case-list? list
+           lst ;
+    case-list? lst
         (       ; zero)
         (-> h t ; self (f zero h) t)
 in
@@ -84,6 +85,12 @@ let . =
     f (g x)
 in
 
+let .: =
+    -> f g ;
+    -> x y ;
+    f (g x) (g y)
+in
+
 # compose N functions
 let ... =
     folds-args . -> x ; x
@@ -102,8 +109,14 @@ let z =
     reversed (list 1 2 3)
 in
 
-print x ; # prints [ 2, 3, 4 ]
-print y ; # prints 6
-print z ; # prints [ 3, 2, 1 ]
-print (sum 1 2 3 4) ;
+let put =
+    -> lst ret ;
+    print (foldl + "" lst) ret
+in
+
+put (` "x = " x) ; # prints [ 2, 3, 4 ]
+put (` "y = " y) ; # prints 6
+put (` "z = " z) ; # prints [ 3, 2, 1 ]
+put (` "(sum 1 2 3 4) = " (sum 1 2 3 4)) ;
+put (` "(apply sum (list 1 2 3 4) = " (apply sum (list 1 2 3 4))) ;
 halt ()

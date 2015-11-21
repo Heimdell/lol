@@ -69,3 +69,7 @@ var vararg = function(f) {
         return f(args)
     }
 }
+
+var apply = function(f, list) {
+    return f.apply(null, list)
+}
