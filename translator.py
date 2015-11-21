@@ -12,7 +12,8 @@ known_ops = {
     "|": "stick",
     "?": "wat",
     ">": "more",
-    "<": "less"
+    "<": "less",
+    "_": "hole"
 }
 
 def convert_char(char):
@@ -29,4 +30,4 @@ safe = lambda op: lambda x, y: op(x, y) if x else y
 def convert_name(name):
     return reduce(safe(add), map(convert_char, name))
 
-print(convert_name("<STDIN?>..."))
+print(convert_name("<STDIN?>._."))
