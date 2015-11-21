@@ -4,7 +4,7 @@ from ast        import *
 from translator import *
 from utils      import *
 
-reserved_words = ["\\", "data", "and", "or", "let", "let-rec", "=", "in", "(", ")", "->"]
+reserved_words = [";", "data", "and", "or", "let", "let-rec", "=", "in", "(", ")", "->"]
 
 def gen_name_parser():
     def act(tokens):
@@ -99,11 +99,16 @@ term = atPoint(lambda point:
         .map(vararg(lambda _, it, _1: it))
 
     | (listOf 
-        & the("\\") 
-        & many1(name) 
         & the("->") 
+        & many1(name) 
+        & the(";") 
         & program)
         .map(vararg(lambda _, args, _1, body: Function(point, args, body)))
+
+    | (listOf 
+        & the(";") 
+        & program)
+        .map(vararg(lambda _, body: Function(point, [], body)))
     )
 )
 
