@@ -2,6 +2,7 @@ from tokenizer  import *
 from parser     import *
 from ast        import *
 from translator import *
+from utils      import *
 
 reserved_words = ["data", "and", "or", "let", "let-rec", "=", "in", "(", ")", "->"]
 

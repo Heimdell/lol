@@ -1,8 +1,9 @@
 
 from functools import *
-from operator import *
+from operator  import *
 
-from ast import *
+from ast       import *
+from utils     import *
 
 known_ops = {
     "+": "plus",
@@ -28,10 +29,14 @@ def convert_char(char):
 
     return "_" + str(ord(char))
 
+# because, as I said, stdlib/reduce is a bullshit
 safe = lambda op: lambda x, y: op(x, y) if x else y
 
 def convert_name(name):
     return reduce(safe(add), map(convert_char, name))
+
+def wrapWithCurlyBracets(string):
+    return "(function() { " + string + "}) ()"
 
 def convert_ast(ast):
     if of(Nil, ast):
@@ -53,15 +58,35 @@ def convert_ast(ast):
         )
 
     if of(App, ast):
-        return convert_ast(ast.f) + "(" + unwordsWith(",", map(convert_ast, ast.xs)) + ")"
+        if ast.xs:
+            return convert_ast(ast.f) + "(" + unwordsWith(",", map(convert_ast, ast.xs)) + ")"
+        else:
+            return convert_ast(ast.f)
 
+    # let-expression, in fact, is in-place desugared to application:
+    # let id = x -> x in id 1 => (id -> id 1) (x -> x)
+    # we need an improvement here, using "var" is more preferrable
     if of(LetExpr, ast):
-        return ( 
-              "(function (" + ast.name 
-            + ") { return " + convert_ast(ast.context) 
-            + " }) (" + convert_ast(ast.value)
-            + ")"
-        )
+        def unfoldLets(ast):
+            if of(LetExpr, ast):
+                list, last = unfoldLets(ast.context)
+                return ([(ast.name, ast.value)] + list, last)
+            return ([], ast)
+
+        bindings, context = unfoldLets(ast)
+
+        def makeVar(name, value):
+            converted = convert_ast(value)
+            return ("var " + convert_name(name) +
+                " = "  + (wrapWithCurlyBracets(converted)
+                if of(LetExpr, value)
+                else converted))
+
+        vars = map(vararg(makeVar), bindings)
+
+        preface = unwordsWith(";", vars)
+
+        return wrapWithCurlyBracets(preface + "; return " + convert_ast(context))
 
     raise "Can't do anything with " + str(ast)
 

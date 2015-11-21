@@ -1,5 +1,8 @@
+
 let uncons = list ret ->
-    ret (fst list) (rest list)
+    (let h = fst list in
+     let t = rest list in
+     ret h t)
 in
 
 let x =
