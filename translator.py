@@ -13,7 +13,8 @@ known_ops = {
     "?": "wat",
     ">": "more",
     "<": "less",
-    "_": "hole"
+    "_": "hole",
+    ".": "dude"
 }
 
 def convert_char(char):
