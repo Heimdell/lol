@@ -86,7 +86,7 @@ def convert_ast(ast):
 
         preface = unwordsWith(";", vars)
 
-        return wrapWithCurlyBracets(preface + "; return " + convert_ast(context))
+        return wrapWithCurlyBracets(preface + " ; return " + convert_ast(context))
 
     raise "Can't do anything with " + str(ast)
 
