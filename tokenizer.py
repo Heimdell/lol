@@ -62,11 +62,11 @@ class Tokenizer:
         self.reset()
 
     def push(self, prefix):
-        t = self.token()
+        t = prefix + self.token()
         if t != ' ' and t != '\n' and t != '\t':
-            if self.start < self.finish:
+            if prefix or self.start < self.finish:
                 self.tokens += [
-                    Token(prefix + self.token(), self.prevPos)
+                    Token(t, self.prevPos)
                 ]
         self.reset()
 
@@ -113,5 +113,3 @@ class Tokenizer:
         self.push("")
 
         return self.tokens
-
-# print(list(map(str, Tokenizer().file("test.lol"))))
