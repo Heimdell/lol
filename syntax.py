@@ -4,7 +4,7 @@ from ast        import *
 from translator import *
 from utils      import *
 
-reserved_words = ["data", "and", "or", "let", "let-rec", "=", "in", "(", ")", "->"]
+reserved_words = ["\\", "data", "and", "or", "let", "let-rec", "=", "in", "(", ")", "->"]
 
 def gen_name_parser():
     def act(tokens):
@@ -41,14 +41,14 @@ let_block = atPoint(lambda point: (
 complex = recursive(lambda: (
     (listOf
         # parse many prefixes of the form "x y ->""
-        & many(
-            (listOf 
-                & getPosition
-                & many(name)
-                & the("->"))
-            .map(vararg(lambda pos, name, _: (pos, name)))
-        )
-
+        # & many(
+        #     (listOf 
+        #         & getPosition
+        #         & many(name)
+        #         & the("->"))
+        #     .map(vararg(lambda pos, name, _: (pos, name)))
+        # )
+        & listOf
         # parse entailing application of the form "f x y ..."
         & (listOf
             & getPosition
@@ -97,6 +97,13 @@ term = atPoint(lambda point:
     | (listOf & the("(") & program & the(")"))
         .called("expression in brackets")
         .map(vararg(lambda _, it, _1: it))
+
+    | (listOf 
+        & the("\\") 
+        & many1(name) 
+        & the("->") 
+        & program)
+        .map(vararg(lambda _, args, _1, body: Function(point, args, body)))
     )
 )
 
