@@ -107,7 +107,3 @@ whole_program = (
         lambda prog, _: prog
     ))
 )
-
-ts = Tokenizer().file("test.lol")
-
-print(whole_program.map(convert_ast).run(ts).result)
