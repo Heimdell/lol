@@ -1,6 +1,7 @@
-from tokenizer import *
-from parser    import *
-from ast       import *
+from tokenizer  import *
+from parser     import *
+from ast        import *
+from translator import *
 
 reserved_words = ["data", "and", "or", "let", "let-rec", "=", "in", "(", ")", "->"]
 
@@ -82,7 +83,7 @@ term = atPoint(lambda point:
     
     | regexp("^[0-9][0-9]*\.?[0-9]*$")
         .called("number")
-        .map(lambda val: Const(point, val))
+        .map(lambda val: Const(point, int(val)))
 
     # string are only started with '"' - thanks to the Tokenizer
     | regexp("^\"")
@@ -109,4 +110,4 @@ whole_program = (
 
 ts = Tokenizer().file("test.lol")
 
-print(whole_program.run(ts))
+print(whole_program.map(convert_ast).run(ts).result)
