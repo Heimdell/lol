@@ -1,6 +1,4 @@
 
-let ` = list in
-
 # perfom case-analisys on list
 let case-list? =
     -> list on-nil on-cons ;

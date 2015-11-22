@@ -1,7 +1,7 @@
 
 // _hole = require("curry")
 
-var list = function() {
+var _quote = function() {
     var res = []
     for (var i = 0; i < arguments.length; i++) {
         res.push(arguments[i])
