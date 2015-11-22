@@ -60,15 +60,7 @@ def convert_ast(ast):
             )
 
         if ast.name[0] == "." and len(ast.name) > 1 and alpha:
-            thing = """
-                (function (object) { 
-                    var args = []
-                    for (var i = 1; i < arguments.length; i++) {
-                        args.push(arguments[i])
-                    }
-                    return object[\"""" + ast.name[1:] + """\"](object, args)
-                })
-            """
+            thing = "(call(\"" + ast.name[1:] + "\"))"
             return thing
         else:
             return convert_name(ast.name)

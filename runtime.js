@@ -137,7 +137,7 @@ var at = function(method, object) {
 
 var box = function() {
     var it = {}
-    for (var i = 0; i < arguments.length; i += 1)
+    for (var i = 0; i < arguments.length; i += 2)
         if (arguments[i])
             it[arguments[i]] = arguments[i + 1]
     return it
@@ -153,4 +153,15 @@ var _less = function (x, y) {
 
 var _more = function (x, y) {
     return x > y
+}
+
+var call = function(method) {
+    return function (object) { 
+        var args = []
+        for (var i = 1; i < arguments.length; i++) {
+            args.push(arguments[i])
+        }
+        console.log(method + ":" + s(args))
+        return object[method].apply(object, args)
+    }
 }

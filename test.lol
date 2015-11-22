@@ -144,7 +144,6 @@ let make-pos =
             "}")
 
         "less" (-> other ;
-            put (` "this " (.str (make-pos file row col))) ;
             put (` "that " (.str other)) ;
             (|| (< row (at "row" other))
                 (&& (equal? row (at "row" other))
@@ -186,8 +185,9 @@ put (` "z = " (s z)) ;
 put (` "(sum 1 2 3 4) = " (sum 1 2 3 4)) ;
 put (` "(apply sum (` 1 2 3 4) = " (apply sum (` 1 2 3 4))) ;
 put (` (foldl2 + 0 (` 1 2 3 4))) ;
-print (.str (make-pos "lol.txt" 5 12)) ;
-print (.str (.count (make-pos "lol.txt" 5 12) " ")) ;
-print (.less (make-pos "lol.txt" 5 12)) ;
-print (.str (make-token "hello" (make-pos "file.ror" 12 13))) ;
+# print (box "a" 1 "b" 2) ;
+# print (.str (make-pos "lol.txt" 5 12)) ;
+# print (.str (.count (make-pos "lol.txt" 5 12) " ")) ;
+print (.less (make-pos "lol.txt" 5 12) (make-pos "ror.txt" 6 13)) ;
+# print (.str (make-token "hello" (make-pos "file.ror" 12 13))) ;
 halt ()
