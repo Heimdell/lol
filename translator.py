@@ -49,7 +49,29 @@ def convert_ast(ast):
         return "[]";
     
     if of(Var, ast):
-        return convert_name(ast.name)
+        alpha = True
+
+        for c in ast.name[1:]:
+            alpha = alpha and (
+                c >= 'A' and c <= 'Z' or 
+                c >= 'a' and c <= 'z' or
+                c >= '0' and c <= '9' or
+                c == "_"
+            )
+
+        if ast.name[0] == "." and len(ast.name) > 1 and alpha:
+            thing = """
+                (function (object) { 
+                    var args = []
+                    for (var i = 1; i < arguments.length; i++) {
+                        args.push(arguments[i])
+                    }
+                    return object[\"""" + ast.name[1:] + """\"](object, args)
+                })
+            """
+            return thing
+        else:
+            return convert_name(ast.name)
     
     if of(Const, ast):
         if of(str, ast.value):
