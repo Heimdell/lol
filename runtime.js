@@ -124,13 +124,11 @@ var loop = function () {
 }
 
 var _doge = function(method, object) {
-    return function() {
-        var args = []
-        for (var i = 0; i < arguments.length; i++) {
-            args.push(arguments[i])
-        };
-        return object[method].apply(object, args)
-    }
+    var args = []
+    for (var i = 2; i < arguments.length; i++) {
+        args.push(arguments[i])
+    };
+    return object[method].apply(object, args)
 }
 
 var at = function(method, object) {
@@ -147,4 +145,12 @@ var box = function() {
 
 var equal_wat = function(x, y) {
     return x == y
+}
+
+var _less = function (x, y) {
+    return x < y
+}
+
+var _more = function (x, y) {
+    return x > y
 }

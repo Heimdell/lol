@@ -126,29 +126,46 @@ let make-pos =
         "file" file
         "row"  row
         "col"  col
+        "count" (-> char ;
+            ? (equal? char '\n')
+                (; make-pos
+                    file
+                    (+ 1 row)
+                    1)
+
+                (; make-pos 
+                    file
+                    row
+                    (+ 1 col)))
+        "str" (; sum 
+            "{"  file
+            ", " row
+            "-"  col
+            "}")
+
+        "less" (-> other ;
+            put (` "this " (.str (make-pos file row col))) ;
+            put (` "that " (.str other)) ;
+            (|| (< row (at "row" other))
+                (&& (equal? row (at "row" other))
+                    (< col (at "col" other)))))
 in
 
-let count =
-    -> pos char ;
-    ? (equal? char '\n')
-        (; make-pos 
-                 (at "file" pos)
-            (+ 1 (at "row"  pos))
-            1)
-
-        (; make-pos 
-                 (at "file" pos)
-                 (at "row" pos)
-            (+ 1 (at "col" pos)))
+let || = -> x y ;
+    ? x (; true) (; y)
 in
 
-let pos-str =
-    -> pos ;
-    sum 
-        "{"  (at "file" pos) 
-        ", " (at "row" pos) 
-        "-"  (at "col" pos) 
-        "}"
+let && = -> x y ;
+    ? x (; y) (; false)
+in
+
+let make-token =
+    -> text pos ;
+    box
+        "text" text
+        "pos"  pos
+        "str" (; sum 
+            "<" text "> @ " (@ "str" pos))
 in
 
 let tokenize =
@@ -169,5 +186,8 @@ put (` "z = " (s z)) ;
 put (` "(sum 1 2 3 4) = " (sum 1 2 3 4)) ;
 put (` "(apply sum (` 1 2 3 4) = " (apply sum (` 1 2 3 4))) ;
 put (` (foldl2 + 0 (` 1 2 3 4))) ;
-print (pos-str (make-pos "lol.txt" 5 12)) ;
+print (.str (make-pos "lol.txt" 5 12)) ;
+print (.str (.count (make-pos "lol.txt" 5 12) " ")) ;
+print (.less (make-pos "lol.txt" 5 12)) ;
+print (.str (make-token "hello" (make-pos "file.ror" 12 13))) ;
 halt ()
