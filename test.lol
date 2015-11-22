@@ -108,9 +108,19 @@ let put =
     print (foldl + "" lst) ret
 in
 
+let foldl2 =
+    -> op zero list ;
+    loop zero list 
+      -> zero list recur ;
+        case-list? list
+            (       ; zero)
+            (-> h t ; recur (op h zero) t)
+in
+
 put (` "x = " (s x)) ;
 put (` "y = " y) ;
 put (` "z = " (s z)) ;
 put (` "(sum 1 2 3 4) = " (sum 1 2 3 4)) ;
 put (` "(apply sum (` 1 2 3 4) = " (apply sum (` 1 2 3 4))) ;
+put (` (foldl2 + 0 (` 1 2 3 4))) ;
 halt ()

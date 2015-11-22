@@ -73,3 +73,54 @@ var vararg = function(f) {
 var apply = function(f, list) {
     return f.apply(null, list)
 }
+
+var init = function(list) {
+    return list.slice(0, list.length - 1)
+}
+
+var last = function(list) {
+    return list[list.length - 1]
+}
+
+var _try = function(what, handler) {
+    try {
+        return what()
+    } catch (e) {
+        return handler(e.content)
+    }
+}
+
+var _throw = function(x) {
+    throw { content: x }
+}
+
+var _dude = function(f, g) {
+    return function (x) {
+        return f (g (x))
+    }
+}
+
+var loop = function () {
+    var args = []
+    for (var i = 0; i < arguments.length - 1; i++) {
+        args.push(arguments[i])
+    };
+    var worker = last(arguments)
+
+    var recur = function() {
+        var args = []
+        for (var i = 0; i < arguments.length; i++) {
+            args.push(arguments[i])
+        };
+        throw { content: args }
+    }
+
+    while (true) {
+        args.push(recur)
+        try {
+            return worker.apply(null, args)
+        } catch (e) {
+            args = e.content
+        }
+    }
+}
