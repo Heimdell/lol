@@ -74,7 +74,12 @@ let folds-args =
 in
 
 # vararg-sum
-let sum = folds-args + 0 in
+let sum = 
+    vararg -> list ;
+    case-list? (reversed list)
+        (       ; list) 
+        (-> h t ; foldl2 + h t)
+in
 
 # compose 2 functions
 let . =
@@ -115,10 +120,54 @@ let foldl2 =
             (-> h t ; recur (op h zero) t)
 in
 
+let make-pos =
+    -> file row col ;
+    box
+        "file" file
+        "row"  row
+        "col"  col
+in
+
+let count =
+    -> pos char ;
+    ? (equal? char '\n')
+        (; make-pos 
+                 (at "file" pos)
+            (+ 1 (at "row"  pos))
+            1)
+
+        (; make-pos 
+                 (at "file" pos)
+                 (at "row" pos)
+            (+ 1 (at "col" pos)))
+in
+
+let pos-str =
+    -> pos ;
+    sum 
+        "{"  (at "file" pos) 
+        ", " (at "row" pos) 
+        "-"  (at "col" pos) 
+        "}"
+in
+
+let tokenize =
+    -> string ;
+    let handler =
+        -> char state ; 
+        state
+    in
+    let state =
+        box ()
+    in
+    foldl2 handler state string
+in
+
 put (` "x = " (s x)) ;
 put (` "y = " y) ;
 put (` "z = " (s z)) ;
 put (` "(sum 1 2 3 4) = " (sum 1 2 3 4)) ;
 put (` "(apply sum (` 1 2 3 4) = " (apply sum (` 1 2 3 4))) ;
 put (` (foldl2 + 0 (` 1 2 3 4))) ;
+print (pos-str (make-pos "lol.txt" 5 12)) ;
 halt ()

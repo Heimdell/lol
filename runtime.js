@@ -1,6 +1,4 @@
 
-// _hole = require("curry")
-
 var _quote = function() {
     var res = []
     for (var i = 0; i < arguments.length; i++) {
@@ -123,4 +121,30 @@ var loop = function () {
             args = e.content
         }
     }
+}
+
+var _doge = function(method, object) {
+    return function() {
+        var args = []
+        for (var i = 0; i < arguments.length; i++) {
+            args.push(arguments[i])
+        };
+        return object[method].apply(object, args)
+    }
+}
+
+var at = function(method, object) {
+    return object[method]
+}
+
+var box = function() {
+    var it = {}
+    for (var i = 0; i < arguments.length; i += 1)
+        if (arguments[i])
+            it[arguments[i]] = arguments[i + 1]
+    return it
+}
+
+var equal_wat = function(x, y) {
+    return x == y
 }
