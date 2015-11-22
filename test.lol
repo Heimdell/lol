@@ -144,7 +144,6 @@ let make-pos =
             "}")
 
         "less" (-> other ;
-            put (` "that " (.str other)) ;
             (|| (< row (at "row" other))
                 (&& (equal? row (at "row" other))
                     (< col (at "col" other)))))
@@ -163,8 +162,7 @@ let make-token =
     box
         "text" text
         "pos"  pos
-        "str" (; sum 
-            "<" text "> @ " (@ "str" pos))
+        "str" (; sum "<" text "> @ " (@ "str" pos))
 in
 
 let tokenize =
@@ -185,9 +183,8 @@ put (` "z = " (s z)) ;
 put (` "(sum 1 2 3 4) = " (sum 1 2 3 4)) ;
 put (` "(apply sum (` 1 2 3 4) = " (apply sum (` 1 2 3 4))) ;
 put (` (foldl2 + 0 (` 1 2 3 4))) ;
-# print (box "a" 1 "b" 2) ;
-# print (.str (make-pos "lol.txt" 5 12)) ;
-# print (.str (.count (make-pos "lol.txt" 5 12) " ")) ;
-print (.less (make-pos "lol.txt" 5 12) (make-pos "ror.txt" 6 13)) ;
-# print (.str (make-token "hello" (make-pos "file.ror" 12 13))) ;
+print (.str (make-pos "lol.txt" 5 12)) ;
+print (.str (.count (make-pos "lol.txt" 5 12) " ")) ;
+print (.less (make-pos "lol.txt" 5 12) (.count (make-pos "ror.txt" 5 12) '\n')) ;
+print (.str (make-token "hello" (make-pos "file.ror" 12 13))) ;
 halt ()

@@ -161,7 +161,6 @@ var call = function(method) {
         for (var i = 1; i < arguments.length; i++) {
             args.push(arguments[i])
         }
-        console.log(method + ":" + s(args))
         return object[method].apply(object, args)
     }
 }
