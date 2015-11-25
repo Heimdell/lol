@@ -95,7 +95,7 @@ def convert_ast(ast):
         def makeVar(name, value):
             converted = convert_ast(value)
             return ("var " + convert_name(name) +
-                " = "  + (wrapWithCurlyBracets(converted)
+                " = "  + (wrapWithCurlyBracets("return " + converted)
                 if of(LetExpr, value)
                 else converted))
 

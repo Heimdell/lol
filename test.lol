@@ -177,6 +177,11 @@ let tokenize =
     foldl2 handler state string
 in
 
+let let-test = 
+    let a = 1 in 
+    a 
+in
+
 put (` "x = " (s x)) ;
 put (` "y = " y) ;
 put (` "z = " (s z)) ;
@@ -187,4 +192,5 @@ print (.str (make-pos "lol.txt" 5 12)) ;
 print (.str (.count (make-pos "lol.txt" 5 12) " ")) ;
 print (.less (make-pos "lol.txt" 5 12) (.count (make-pos "ror.txt" 5 12) '\n')) ;
 print (.str (make-token "hello" (make-pos "file.ror" 12 13))) ;
+put (` "let-test = " let-test) ;
 halt ()
