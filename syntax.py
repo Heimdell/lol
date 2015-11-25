@@ -50,11 +50,6 @@ complex = recursive(lambda: (
     .map(vararg(buildAFuncOrApp))
 ))
 
-# stdlib/reduce is a bullshit
-def foldr(lst, start, op):
-    #                                      v-- bullshit!
-    return reduce(lambda x, y: op(x, y) if x else y, reversed(lst), start)
-
 # ([[pos1, x, y], [pos2, w, z]], App(pos3, f, [x, y])) 
 # -> 
 # Function(pos1, [x, y], Function(pos2, [w, z], App(pos3, f, [x, y])))

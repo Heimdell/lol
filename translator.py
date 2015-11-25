@@ -32,9 +32,6 @@ def convert_char(char):
 
     return "_" + str(ord(char))
 
-# because, as I said, stdlib/reduce is a bullshit
-safe = lambda op: lambda x, y: op(x, y) if x else y
-
 def convert_name(name):
     if name in js_keywords:
         return "_" + name

@@ -1,10 +1,6 @@
 
 from functools import *
 
-# for later
-def of(type, x):
-    return isinstance(x, type)
-
 # hierarhy root
 class Ast:
     pass
@@ -111,6 +107,3 @@ class DataCtor(Ast):
 
     def __str__(me):
         return me.name + " " + unwords(me.dtors)
-
-def constant(x):
-    return lambda *_: x
