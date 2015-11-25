@@ -4,18 +4,10 @@ from ast        import *
 from translator import *
 from utils      import *
 
-reserved_words = [";", "data", "and", "or", "let", "let-rec", "=", "in", "(", ")", "->"]
-
-def gen_name_parser():
-    def act(tokens):
-        if tokens and not tokens[0].text in reserved_words:
-            return Ok(tokens[0].text, tokens[1:])
-        else:
-            return Expected(["name"], at(tokens))
-
-    return Parser(act)
-
-name = gen_name_parser()
+name = (
+    notOneOf([";", "data", "and", "or", "let", "=", "in", "(", ")", "->"])
+        .called("name")
+)
 
 # program is a let-block or a pure expression
 program = recursive(lambda: (

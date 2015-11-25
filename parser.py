@@ -242,3 +242,12 @@ def regexp(reg):
 getPosition = Parser(lambda stream: Ok(at(stream), stream))
 
 atPoint = getPosition.bind
+
+def notOneOf(reserved_words):
+    def act(tokens):
+        if tokens and not tokens[0].text in reserved_words:
+            return Ok(tokens[0].text, tokens[1:])
+        else:
+            return Expected(["not one of " + str(reserved_words)], at(tokens))
+
+    return Parser(act)
