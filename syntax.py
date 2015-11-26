@@ -5,7 +5,7 @@ from translator import *
 from utils      import *
 
 name = (
-    notOneOf(["...", "data", "and", "or", "let", "=", "in", "(", ")", "->"])
+    notOneOf(["...", "data", "and", "or", "let", "=", "in", "(", ")", "\\"])
     .called("name")
 )
 
@@ -27,6 +27,7 @@ whole_program = recursive(lambda: (
 program = recursive(lambda: (
     ( application
     | let_expr
+    | delayed
     )
 ))
 
@@ -78,7 +79,15 @@ application = atPoint(lambda point: (
     )))
 ))
 
-term = recursive(lambda: const | var | let_expr)
+term = recursive(lambda: const | var)
+
+delayed = atPoint(lambda point: (
+    (listOf
+        & "\\"
+        & program)
+
+    .map(vararg(lambda _, it: Delayed(point, it)))
+))
 
 const = atPoint(lambda point: (
     ( regexp("^[0-9][0-9]*\.?[0-9]*$").map(int)

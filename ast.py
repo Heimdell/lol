@@ -45,6 +45,14 @@ class LetExpr(Ast):
         )), me.bindings))
         return "let " + bindings_text + " in\n" + str(me.context)
 
+class Delayed(Ast):
+    def __init__(me, info, thunk):
+        me.info  = info
+        me.thunk = thunk
+
+    def __str__(me):
+        return "(\\" + str(me.thunk) + ")"
+
 # list(str) -> str
 # ['a', 'b', 'c'] -> 'a b c'
 def unwordsWith(sep, lst):

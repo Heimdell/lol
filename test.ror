@@ -2,11 +2,10 @@
 let list xs ... = xs
 and case-list? list handle-empty handle-nonempty =
     let is-empty = null? list
-    and handle-nonempty-thunk = lazily
+    and handle-nonempty-thunk = \
         let head = fst  list
         and tail = rest list
-        and thunk = handle-nonempty head tail
-        in force thunk
+        in handle-nonempty head tail
     in if is-empty
         handle-empty
         handle-nonempty-thunk
