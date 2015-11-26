@@ -9,13 +9,6 @@ name = (
     .called("name")
 )
 
-'''
-    program     ::= let-expr | application | const | var
-    let-expr    ::= "let" bindings "in" program
-    bindings    ::= binding ("and" binding)*
-    application ::= name program*
-'''
-
 whole_program = recursive(lambda: (
     (listOf
         & program
