@@ -13,7 +13,7 @@ and case-list? list handle-empty handle-nonempty =
             handle-nonempty-thunk
 
 and test-list         = list 1 2 3
-and test-empty        = lazily "false"
-and test-nonempty _ _ = lazily "true"
+and test-empty        = \ "false"
+and test-nonempty _ _ = \ "true"
 in  
     case-list? test-list test-empty test-nonempty
