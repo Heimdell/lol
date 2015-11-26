@@ -13,7 +13,7 @@ class Var(Ast):
 
     def __str__(me):
         # for debug reasons
-        return "$" + me.name
+        return me.name
 
 class Const(Ast):
     def __init__(me, info, value):
@@ -22,7 +22,7 @@ class Const(Ast):
 
     def __str__(me):
         # for debug reasons
-        return "#" + str(me.value)
+        return "<" + str(me.value) + ">"
 
 class App(Ast):
     def __init__(me, info, f, xs):
@@ -31,7 +31,7 @@ class App(Ast):
         me.xs   = xs
 
     def __str__(me):
-        return str(me.f) + " " + unwords(me.xs)
+        return str(me.f) + "(" + unwordsWith(",", me.xs) + ")"
 
 class LetExpr(Ast):
     def __init__(me, info, bindings, context):

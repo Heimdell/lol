@@ -25,8 +25,8 @@ whole_program = recursive(lambda: (
 ))
 
 program = recursive(lambda: (
-    ( let_expr
-    | application
+    ( application
+    | let_expr
     )
 ))
 
@@ -78,11 +78,11 @@ application = atPoint(lambda point: (
     )))
 ))
 
-term = recursive(lambda: const | var)
+term = recursive(lambda: const | var | let_expr)
 
 const = atPoint(lambda point: (
     ( regexp("^[0-9][0-9]*\.?[0-9]*$").map(int)
-    | regexp("^\"")
+    | regexp("^\"").map(lambda it: it + '"')
     )
     .map(lambda it: Const(point, it))
 ))
