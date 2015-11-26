@@ -5,11 +5,15 @@ and case-list? list handle-empty handle-nonempty =
     and handle-nonempty-thunk = \
         let head = fst  list
         and tail = rest list
-        in handle-nonempty head tail
-    in if is-empty
-        handle-empty
-        handle-nonempty-thunk
+        in  handle-nonempty head tail
+    in  
+        if is-empty 
+            handle-empty 
+        #else
+            handle-nonempty-thunk
+
 and test-list         = list 1 2 3
 and test-empty        = lazily "false"
 and test-nonempty _ _ = lazily "true"
-in  case-list? test-list test-empty test-nonempty
+in  
+    case-list? test-list test-empty test-nonempty
