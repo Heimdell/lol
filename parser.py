@@ -136,6 +136,9 @@ class Parser:
 
     # run self, then "other"; "combine" results
     def __and__(self, other):
+        if isinstance(other, str):
+            other = the(other)
+
         def act(stream):
             res = self.run(stream)
 

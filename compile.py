@@ -11,8 +11,8 @@ def compile(filename):
     tokens = Tokenizer().file(filename)
     parse  = whole_program.run(tokens)
     if parse.isOk():
-        output = convert(parse.result)
-        open(filename + ".js", "w").write(output)
+        # output = convert(parse.result)
+        open(filename + ".js", "w").write(str(parse.result))
     else:
         print(parse)
 
