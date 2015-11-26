@@ -12,7 +12,8 @@ def compile(filename):
     parse  = whole_program.run(tokens)
     if parse.isOk():
         # output = convert(parse.result)
-        open(filename + ".js", "w").write(str(parse.result))
+        # open(filename + ".js", "w").write(str(parse.result))
+        print(parse.result)
     else:
         print(parse)
 
@@ -30,8 +31,10 @@ def main():
             sys.exit(0)
 
     for arg in args:
-        sys.stdout.write("Compiling " + arg + "... ")
+        print("Compiling " + arg + "... ")
+        print("=========")
         compile(arg)
+        print("====")
         print("done.")
 
 if __name__ == "__main__":
