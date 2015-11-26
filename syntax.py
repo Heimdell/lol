@@ -5,7 +5,7 @@ from translator import *
 from utils      import *
 
 name = (
-    notOneOf(["...", "data", "and", "or", "let", "=", "in", "(", ")", "\\"])
+    notOneOf(["...", "and", "let", "=", "in", "\\"])
     .called("name")
 )
 
