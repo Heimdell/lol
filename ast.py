@@ -40,11 +40,11 @@ class LetExpr(Ast):
         me.context  = context
 
     def __str__(me):
-        return "let " + unwordsWith("\nand", (map(indent, me.bindings))) + "\nin  " + str(me.context)
+        return "\nlet " + unwordsWith("\nand", (map(indent, me.bindings))) + "\nin  " + str(me.context)
 
 def indent(text):
     header, *lines = str(text).split("\n")
-    return header + "\n" + joinWith("\n", map(lambda line: "    " + line, lines))
+    return header + ("\n" if lines else "") + joinWith("\n", map(lambda line: "    " + line, lines))
 
 class Binding(Ast):
     def __init__(me, info, name, type, args, vararg, value):
@@ -70,6 +70,6 @@ class Delayed(Ast):
         me.thunk = thunk
 
     def __str__(me):
-        return "(\\" + str(me.thunk) + ")"
+        return "(\\" + indent(str(me.thunk)) + ")"
 
 
