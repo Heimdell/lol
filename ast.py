@@ -22,7 +22,7 @@ class Const(Ast):
 
     def __str__(me):
         # for debug reasons
-        return "<" + str(me.value) + ">"
+        return "<" + str(me.value)  + ">"
 
 class App(Ast):
     def __init__(me, info, f, xs):
@@ -31,7 +31,7 @@ class App(Ast):
         me.xs   = xs
 
     def __str__(me):
-        return str(me.f) + "(" + unwordsWith(",", me.xs) + ")"
+        return str(me.f) + " (" + joinWith(", ", me.xs) + ")"
 
 class LetExpr(Ast):
     def __init__(me, info, bindings, context):
@@ -40,10 +40,29 @@ class LetExpr(Ast):
         me.context  = context
 
     def __str__(me):
-        bindings_text = unwordsWith("\nand", map(vararg(lambda val, args, vararg, value: (
-            val + " " + unwords(args) + (" ..." if vararg else "") + " = " + str(value)
-        )), me.bindings))
-        return "let " + bindings_text + " in\n" + str(me.context)
+        return "let " + unwordsWith("\nand", (map(indent, me.bindings))) + "\nin  " + str(me.context)
+
+def indent(text):
+    header, *lines = str(text).split("\n")
+    return header + "\n" + joinWith("\n", map(lambda line: "    " + line, lines))
+
+class Binding(Ast):
+    def __init__(me, info, name, type, args, vararg, value):
+        me.info   = info
+        me.name   = name
+        me.type   = type
+        me.args   = args
+        me.vararg = vararg
+        me.value  = value
+
+    def __str__(me):
+        return (
+            me.name + " :: " + str(me.type) + "\n" +
+            me.name + 
+            (" " + unwords(me.args) if me.args else "") +
+            (" ..." if me.vararg else "") +
+            " = " + str(me.value)
+        )
 
 class Delayed(Ast):
     def __init__(me, info, thunk):
@@ -52,4 +71,5 @@ class Delayed(Ast):
 
     def __str__(me):
         return "(\\" + str(me.thunk) + ")"
+
 

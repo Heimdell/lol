@@ -64,17 +64,22 @@ binding = atPoint(lambda point: (
         & "="
         & program)
 
-    .map(vararg(lambda name, args, vararg, _, value: (name, args, bool(vararg), value)))
+    .map(vararg(lambda name, args, vararg, _, value: (
+        Binding(point, name, None, args, vararg, value)
+    )))
 ))
 
 application = atPoint(lambda point: (
-    (listOf
+    ( const
+
+    | (listOf
         & var
         & many(term))
 
-    .map(vararg(lambda f, xs: (
-        f if empty(xs) else App(point, f, xs)
-    )))
+        .map(vararg(lambda f, xs: (
+            f if empty(xs) else App(point, f, xs)
+        )))
+    )
 ))
 
 term = recursive(lambda: const | var)
@@ -99,3 +104,5 @@ var = atPoint(lambda point:
     .called("name")
     .map(lambda name: Var(point, name))
 )
+
+print(term.run(Tokenizer().run("-", '"asd"')))
