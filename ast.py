@@ -53,15 +53,3 @@ class Delayed(Ast):
     def __str__(me):
         return "(\\" + str(me.thunk) + ")"
 
-# list(str) -> str
-# ['a', 'b', 'c'] -> 'a b c'
-def unwordsWith(sep, lst):
-    add = lambda x, y: x + " " + sep + " " + y if x else y
-    return str(reduce(add, map(str, lst), ""))
-
-# list(str) -> str
-# ['a', 'b', 'c'] -> 'a b c'
-def unwords(lst):
-    add = lambda x, y: x + " " + y if x else y
-    return str(reduce(add, map(str, lst), ""))
-

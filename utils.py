@@ -22,3 +22,22 @@ def constant(x):
 
 def empty(l):
     return len(l) == 0
+
+# list(str) -> str
+# ['a', 'b', 'c'] -> 'a b c'
+def unwordsWith(sep, lst):
+    add = lambda x, y: x + " " + sep + " " + y if x else y
+    return str(reduce(add, map(str, lst), ""))
+
+# list(str) -> str
+# ['a', 'b', 'c'] -> 'a b c'
+def joinWith(sep, lst):
+    add = lambda x, y: x + sep + y if x else y
+    return str(reduce(add, map(str, lst), ""))
+
+# list(str) -> str
+# ['a', 'b', 'c'] -> 'a b c'
+def unwords(lst):
+    add = lambda x, y: x + " " + y if x else y
+    return str(reduce(add, map(str, lst), ""))
+

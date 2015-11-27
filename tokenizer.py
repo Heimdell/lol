@@ -15,7 +15,7 @@ class Pos:
             return Pos(self.file, self.row, self.col + 1)
 
     def __str__(self):
-        return "{" + str(self.file) + ": " + str(self.row) + "-" + str(self.col) + "}"
+        return str(self.file) + ":" + str(self.row) + ":" + str(self.col)
 
     # order
     def __gt__(self, other):

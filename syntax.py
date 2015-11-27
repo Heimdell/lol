@@ -18,7 +18,7 @@ whole_program = recursive(lambda: (
 ))
 
 program = recursive(lambda: (
-    ( application
+    ( application.called("application")
     | let_expr
     | delayed
     )
@@ -26,7 +26,7 @@ program = recursive(lambda: (
 
 let_expr = atPoint(lambda point: (
     (listOf
-        & "let"
+        & the("let").called("let-expression")
         & bindings
         & "in"
         & program)
@@ -39,16 +39,21 @@ let_expr = atPoint(lambda point: (
 bindings = recursive(lambda: (
     (listOf
         & binding
-        & many(
-            (listOf
-                & "and"
-                & binding)
-
-            .map(vararg(lambda _, binding: binding))))
+        & bindings_cont)
 
     .map(vararg(lambda fst, rest: (
         [fst] + rest
     )))
+))
+
+bindings_cont = recursive(lambda: (
+    ( (listOf 
+        & "and"
+        & binding
+        & bindings_cont)
+        .map(vararg(lambda _, it, rest: [it] + rest))
+    | pure([])
+    )
 ))
 
 binding = atPoint(lambda point: (
@@ -76,7 +81,7 @@ term = recursive(lambda: const | var)
 
 delayed = atPoint(lambda point: (
     (listOf
-        & "\\"
+        & the("\\").called("\-thunk")
         & program)
 
     .map(vararg(lambda _, it: Delayed(point, it)))
