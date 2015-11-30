@@ -5,7 +5,7 @@ from translator import *
 from utils      import *
 
 name = (
-    notOneOf(["...", "and", "let", "=", "in", "\\"])
+    notOneOf(["...", "val", "fun", "=", "in", "\\"])
     .called("name")
 )
 
@@ -26,47 +26,45 @@ program = recursive(lambda: (
 
 let_expr = atPoint(lambda point: (
     (listOf
-        & the("let").called("let-expression")
         & bindings
         & "in"
         & program)
 
-    .map(vararg(lambda _, bindings, _1, context: (
+    .map(vararg(lambda bindings, _1, context: (
         LetExpr(point, bindings, context)
     )))
 ))
 
 bindings = recursive(lambda: (
-    (listOf
+    ( (listOf
         & binding
-        & bindings_cont)
-
-    .map(vararg(lambda fst, rest: (
-        [fst] + rest
-    )))
-))
-
-bindings_cont = recursive(lambda: (
-    ( (listOf 
-        & "and"
-        & binding
-        & bindings_cont)
-        .map(vararg(lambda _, it, rest: [it] + rest))
+        & bindings)
+        .map(vararg(lambda x, xs: [x] + xs))
     | pure([])
     )
 ))
 
 binding = atPoint(lambda point: (
-    (listOf
+    ( (listOf
+        & "val"
         & name
-        & many(name)
-        & (the("...") | pure(False))
         & "="
         & program)
+        .map(vararg(lambda _val, name, _, value: (
+            Binding(point, name, None, [], None, value)
+        )))
+    | (listOf
+        & "fun"
+        & name
+        & many1(name)
+        & (the("...") | pure(None))
+        & "="
+        & program)
+        .map(vararg(lambda _fun, name, args, vararg, _, value: (
+            Binding(point, name, None, args, vararg, value)
+        )))
+    )
 
-    .map(vararg(lambda name, args, vararg, _, value: (
-        Binding(point, name, None, args, vararg, value)
-    )))
 ))
 
 application = atPoint(lambda point: (
@@ -104,5 +102,3 @@ var = atPoint(lambda point:
     .called("name")
     .map(lambda name: Var(point, name))
 )
-
-print(term.run(Tokenizer().run("-", '"asd"')))
