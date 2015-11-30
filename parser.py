@@ -68,12 +68,15 @@ class Expected(ParseResult):
         return "Expected " + prettyUnwords(me.faults) + " at " + str(me.where) + "."
 
 def prettyUnwords(list):
-    l = len(list)
-    if l == 1:
-        return l[0]
+    try:
+        l = len(list)
+        if l == 1:
+            return l[0]
 
-    (last, init) = (list[l-1], list[:l-1])
-    return joinWith(", ", init) + " or " + str(last)
+        (last, init) = (list[l-1], list[:l-1])
+        return joinWith(", ", init) + " or " + str(last)
+    except:
+        return str(list)
 
 # accumulate to tuple or list
 def combine(a, b):
