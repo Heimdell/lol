@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3
 
 from tokenizer  import Tokenizer
 from syntax     import whole_program
