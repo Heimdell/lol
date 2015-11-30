@@ -80,14 +80,13 @@ class Tokenizer:
 
         while self.finish < len(text):
             char = self.text[self.finish]
+            self.count(char)
             if char in ["(", ")"]:
                 self.push("")
-                self.count(char)
                 self.force_push(char)
 
             elif char in [" ", "\n", "\t"]:
                 self.push("")
-                self.count(char)
 
             elif char in ['"', "'"]:
                 self.push("")
@@ -103,13 +102,14 @@ class Tokenizer:
                 while char != '\n':
                     self.finish += 1
                     char = self.text[self.finish]
+                    self.count(char)
                 self.reset()
-
-            else:
-                self.count(char)
 
             self.finish += 1
 
         self.push("")
 
         return self.tokens
+
+for x in Tokenizer().file("test.ror"):
+    print(x)
