@@ -110,6 +110,3 @@ class Tokenizer:
         self.push("")
 
         return self.tokens
-
-for x in Tokenizer().file("test.ror"):
-    print(x)
