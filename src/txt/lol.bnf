@@ -1,5 +1,5 @@
 program     ::= let-expr | application | delayed
 let-expr    ::= "let" bindings "in" program
 bindings    ::= binding ("and" binding)*
-application ::= name term*
+application ::= term term*
 term        ::= name | const

@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+import sys
+import os
+
 from tokenizer  import Tokenizer
 from syntax     import whole_program
 from translator import convert

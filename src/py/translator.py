@@ -5,7 +5,7 @@ from operator  import *
 from ast       import *
 from utils     import *
 
-js_keywords = open("js_keywords").read().split()
+js_keywords = open("src/js/js_keywords").read().split()
 
 known_ops = {
     "+": "plus",
