@@ -54,6 +54,7 @@ binding = atPoint(lambda point: (
         .map(vararg(lambda _val, name, _, value: (
             Binding(point, name, None, [], None, value)
         )))
+
     | (listOf
         & "fun"
         & name
@@ -65,20 +66,16 @@ binding = atPoint(lambda point: (
             Binding(point, name, None, args, vararg, value)
         )))
     )
-
 ))
 
 application = atPoint(lambda point: (
-    ( const
-
-    | (listOf
-        & var
+    (listOf
+        & term
         & many(term))
 
         .map(vararg(lambda f, xs: (
             f if empty(xs) else App(point, f, xs)
         )))
-    )
 ))
 
 term = recursive(lambda: const | var)
