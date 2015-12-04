@@ -39,3 +39,12 @@ def joinWith(sep, lst):
 def unwords(lst):
     return joinWith(" ", lst)
 
+def lazy(f):
+    y = None
+    def called():
+        nonlocal y
+        if y == None:
+            y = f()
+        return y
+    return called
+
