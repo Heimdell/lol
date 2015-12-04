@@ -208,7 +208,7 @@ def the(token):
 
 # the body of the parser evaluates on its first call, lazily
 # allows to write self- or mutually-recursive parsers
-def recursive(thunk):
+def deferred(thunk):
     concrete = None
 
     def act(stream):
@@ -257,8 +257,6 @@ def regexp(reg):
     return Parser(act)
 
 getPosition = Parser(lambda stream: Ok(at(stream), stream))
-
-atPoint = getPosition.bind
 
 def notOneOf(reserved_words):
     def act(tokens):

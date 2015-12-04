@@ -10,7 +10,7 @@ name = (
     .called("name")
 )
 
-whole_program = recursive(lambda: (
+whole_program = deferred(lambda: (
     (listOf
         & program
         & eof)
@@ -18,25 +18,26 @@ whole_program = recursive(lambda: (
     .map(vararg(lambda it, _: it))
 ))
 
-program = recursive(lambda: (
+program = deferred(lambda: (
     ( application.called("application")
     | let_expr
     | delayed
     )
 ))
 
-let_expr = atPoint(lambda point: (
+let_expr = deferred(lambda: (
     (listOf
+        & getPosition
         & bindings
         & "in"
         & program)
 
-    .map(vararg(lambda bindings, _1, context: (
+    .map(vararg(lambda point, bindings, _, context: (
         LetExpr(point, bindings, context)
     )))
 ))
 
-bindings = recursive(lambda: (
+bindings = deferred(lambda: (
     ( (listOf
         & binding
         & bindings)
@@ -45,58 +46,70 @@ bindings = recursive(lambda: (
     )
 ))
 
-binding = atPoint(lambda point: (
+binding = deferred(lambda: (
     ( (listOf
+        & getPosition
         & "val"
         & name
         & "="
         & program)
-        .map(vararg(lambda _val, name, _, value: (
+        .map(vararg(lambda point, _val, name, _, value: (
             Binding(point, name, None, [], None, value)
         )))
 
     | (listOf
+        & getPosition
         & "fun"
         & name
         & many1(name)
         & (the("...") | pure(None))
         & "="
         & program)
-        .map(vararg(lambda _fun, name, args, vararg, _, value: (
+        .map(vararg(lambda point, _fun, name, args, vararg, _, value: (
             Binding(point, name, None, args, vararg, value)
         )))
     )
 ))
 
-application = atPoint(lambda point: (
+application = deferred(lambda: (
     (listOf
+        & getPosition
         & term
         & many(term))
 
-        .map(vararg(lambda f, xs: (
+        .map(vararg(lambda point, f, xs: (
             f if empty(xs) else App(point, f, xs)
         )))
 ))
 
-term = recursive(lambda: const | var)
+term = deferred(lambda: const | var)
 
-delayed = atPoint(lambda point: (
+delayed = deferred(lambda: (
     (listOf
+        & getPosition
         & the("\\").called("\-thunk")
         & program)
 
-    .map(vararg(lambda _, it: Delayed(point, it)))
+    .map(vararg(lambda point, _, it: Delayed(point, it)))
 ))
 
-const = atPoint(lambda point: (
-    ( regexp("^[0-9][0-9]*\.?[0-9]*$").map(int)
-    | regexp("^\"").map(lambda it: it + '"')
-    )
-    .map(lambda it: Const(point, it))
+const = deferred(lambda: (
+    (listOf
+        & getPosition
+        & ( regexp("^[0-9][0-9]*\.?[0-9]*$")
+            .map(int)
+          
+          | regexp("^\"")
+            .map(lambda it: it + '"')
+          ))
+    
+    .map(vararg(lambda point, it: Const(point, it)))
 ))
 
-var = atPoint(lambda point:
-    name
-    .called("name")
-    .map(lambda name: Var(point, name))
-)
+var = deferred(lambda: (
+    (listOf
+        & getPosition
+        & name
+          .called("name"))
+          .map(vararg(lambda point, name: Var(point, name)))
+))
