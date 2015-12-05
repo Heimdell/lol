@@ -1,170 +1,143 @@
 
-from utils import of
+from utils import *
 
-def andThen(f, g):
-    def go(x):
-        f(x)
-        g(x)
+class Msg(BaseException):
+    def __init__(me, str):
+        me.str = str
 
-    return go
+def unify(stack):
+    try:    
+        if not stack:
+            return []
 
-vars = dict()
+        (s, t), *rest = stack
 
-def get(name):
-    if name in vars:
-        return vars[name]
+        if s == t:
+            return unify(rest)
 
-    vars[name] = TypeVar(name)
-    return vars[name]
+        if of(Var, s):
+            if not t.contains(s.name):
+                return [(s.name, t)] + unify(list(map(applyToEq((s.name, t)), rest)))
+            else:
+                raise Msg("cycle: " + s.name + " == " + str(t))
 
-class Message(BaseException):
-    def __init__(self, msg):
-        self.msg = msg
+        if of(Var, t):
+            if not s.contains(t.name):
+                return [(t.name, s)] + unify(list(map(applyToEq((t.name, s)), rest)))
+            else:
+                raise Msg("cycle: " + t.name + " == " + str(s))
 
-    def __add__(l, r):
-        return Message(l.msg + r)
+        if of(Forall, s) and of(Forall, t):
+            name = fresh()
+            return unify([(s.on(name), t.on(name))] + rest)
 
-class Type:
-    def __pow__(l, r):
-        return Arrow(l, r)
+        if of(Forall, s):
+            name = fresh()
+            return unify([(s.on(name), t)] + rest)
 
-class TypeVar(Type):
-    def __init__(self, name, onSet = lambda _: None):
-        self.name  = name
-        self.onSet = onSet
+        if of(Thing, s) and of(Thing, t):
+            if s.f.name == t.f.name:
+                return unify(list(zip(s.deps, t.deps)) + list(zip(t.codeps, s.codeps)) + rest)
 
-    def eq(me, it):
-        if of(TypeVar, it):
-            return me.name == it.name
-        else:
-            return False
+        if of(Const, s) and of(Const, t):
+            if s.name == t.name:
+                return unify(rest)
 
-    def __str__(me):
-        return me.name
+        raise Msg(str(s) + " doesn't replace " + str(t))
 
-    def cyclic(me, stack = []):
-        return False
+    except Msg as m:
+        raise Msg(m.str + "\nwhile unifying " + str(s) + " ~ " + str(t))
 
-    def set_to(me, i, new):
-        if of(TypeVar, new):
-            new.onSet = andThen(new.onSet, me.onSet)
-        else:
-            me.onSet(new)
-        me = new
+class Var:
+    def __init__(me, name):
+        me.name = name
 
-    def set_from(me, i, new):
-        if of(TypeVar, new):
-            new.onSet = andThen(new.onSet, me.onSet)
-        else:
-            me.onSet(new)
-        me.value = new
-
-class Forall(Type):
-    def __init__(self, producer):
-        self.producer = producer
-
-    def __str__(me):
-        n = fresh()
-        return "∀" + n.name + "." + str(me.producer(n))
-
-    def cyclic(me, stack = []):
-        return me.producer(fresh()).cyclic(stack)
-
-    def eq(me, it):
-        if not of(Forall, it):
-            return False
-        n = fresh()
-        return me.producer(n).eq(it.producer(n))
-
-class Arrow(Type):
-    def __init__(self, domain, image):
-        self.domain = domain
-        self.image  = image
-
-    def __str__(me):
-        return "(" + str(me.domain) + " -> " + str(me.image) + ")"
-
-    def cyclic(me, stack = []):
-        return me.domain.cyclic(stack) or me.image.cyclic(stack)
-
-    def eq(me, it):
-        return of(Arrow, it) and me.domain.eq(it.domain) and me.image.eq(it.image)
-
-class Ground(Type):
-    def __init__(self, name = "*"):
-        self.name = name
+    def contains(me, name):
+        return me.name == name
 
     def __str__(me):
         return me.name
 
-    def cyclic(me, _ = []):
+    def apply(me, subst):
+        if me.name == subst[0]:
+            return subst[1]
+        else:
+            return me
+
+class Forall:
+    def __init__(me, on):
+        me.on = on
+
+    def contains(me, name):
+        return me.on(fresh).contains(name)
+
+    def __str__(me):
+        var = fresh()
+        return "∀" + var.name + "." + str(me.on(var))
+
+    def apply(me, subst):
+        return me.on(fresh).apply(subst)
+
+class Thing:
+    def __init__(me, f, deps, codeps):
+        me.f = f
+        me.deps = deps
+        me.codeps = codeps
+
+    def contains(me, name):
+        def anyContains(ts):
+            return list(filter(lambda t: t.contains(name), ts))
+        return me.f.contains(name) or anyContains(me.deps) or anyContains(me.codeps)
+
+    def __str__(me):
+        return str(me.f) + "[+ " + joinWith(",", me.deps) + "; -" + joinWith(",", me.codeps) + "]"
+
+    def apply(me, subst):
+        ap = lambda t: t.apply(subst)
+        return Thing(ap(f), list(map(ap, me.deps)), list(map(ap, me.codeps)))
+
+class Const:
+    def __init__(me, name):
+        me.name = name
+
+    def contains(me, name):
         return False
 
-    def eq(me, it):
-        if not of(Ground, it):
-            return False
+    def __str__(me):
+        return me.name
 
-        return me.name == it.name
+    def apply(me, subst):
+        return me
 
 def fresh():
-    name = "?" + str(fresh.n)
+    n = str(fresh.n) + "?"
     fresh.n += 1
-    return TypeVar(name)
+    return Var(n)
 
 fresh.n = 0
 
-def lub(i, x, y):
-    print(" " * i + str(x) + " > " + str(y))
-    try:
-        if x.eq(y):
-            return True
-
-        if of(TypeVar, x):
-            x.set_to(i + 1, y)
-            if x.cyclic():
-                raise Message("infinite type: " + str(x))
-            return True
-
-        if of(TypeVar, y):
-            y.set_from(i + 1, x)
-            if y.cyclic():
-                raise Message("infinite type: " + str(y))
-            return True
-
-        if of(Forall, x) and of(Forall, y):
-            n = fresh()
-            x1 = x.producer(n)
-            y1 = y.producer(n)
-            return lub(i + 1, x1, y1)
-
-        if of(Forall, x):
-            n = fresh()
-            x1 = x.producer(n)
-            return lub(i + 1, x1, y)
-
-        if of(Arrow, x) and of(Arrow, y):
-            return (
-                (   lub(i + 1, y.domain, x.domain)
-                and lub(i + 1, x.image,  y.image)
-                )
-            )
-
-        if of(Ground, x) and of(Ground, y):
-            return x.name == y.name
-
-        raise Message(str(x) + " =/= " + str(y))
-
-    except Message as e:
-        raise Message(e.msg + "\nwhile unifying " + str(x) + " with " + str(y))
+def applyToEq(subst):
+    return lambda coll: map(lambda t: t.apply(subst), coll)
 
 def catch(thunk):
     try:
         return thunk()
-    except Message as e:
-        return e.msg
+    except Msg as e:
+        return e.str
 
-res = TypeVar("result", lambda new: print("result := " + str(new)))
+def printSubs(subs):
+    print(joinWith("; ", map(lambda it: it[0] + " -> " + str(it[1]), subs))  if not of(str, subs) else subs)
 
-print(catch(lambda: (
-    lub(0, Forall(lambda var: var ** var ** var), res ** Ground() ** res)
+printSubs(catch(lambda: unify(
+    [ ( Thing(Const("->"), [Forall(lambda var: Thing(Const("->"), [var], [var]))], [Const("a")])
+      , Thing(Const("->"), [Thing(Const("->"), [Const("int")], [Var("o")])], [Const("a")])
+      )
+    ]
+)))
+
+printSubs(catch(lambda: unify(
+    [ ( Thing(Const("->"), [Thing(Const("->"), [Const("int")], [Var("o")])], [Const("a")])
+      , Thing(Const("->"), [Forall(lambda var: Thing(Const("->"), [var], [var]))], [Const("a")])
+      )
+    ]
 )))
