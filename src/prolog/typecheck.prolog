@@ -1,8 +1,8 @@
 
 test 
     :- gt(
-        ((app(list, forall(I, I)) -> o) -> (app(list, i) -> o)) -> o, 
-        forall(A, A -> A) -> o,
+        (((a -> b) -> c) -> d) -> e, 
+        (((forall(A, A) -> b) -> c) -> d) -> e,
         R
     ),
     (   R = ok
@@ -20,6 +20,8 @@ gt(I, X, Y, R)
         ;   var(X) -> !, X = Y, R = ok
         ;   var(Y) -> !, Y = X, R = ok
         
+        ;   X = Y, R = ok
+
         ;   X = forall(_, _), Y = forall(_, _)
         ->  copy_term(X, forall(U, Q))
         ,   copy_term(Y, forall(U, W))
@@ -45,8 +47,6 @@ gt(I, X, Y, R)
         ;   X =.. [app | ThingsX], Y =.. [app | ThingsY]
         ->  fold(gt(s(I)), ThingsX, ThingsY, R1)
         ,   ( R1 = ok -> R = ok; append(R1, [{'while unifying', X > Y}], R))
-
-        ;   X = Y, R = ok
 
         ;   R = [{X, 'not a valid subset of', Y}]
         ).
@@ -82,3 +82,42 @@ die(M)
     :-  writeln(M)
     ,   fail
     .
+
+typecheck(E, X, _)
+    :-  die(typecheck(E, X, ?))
+    .
+
+typecheck(Env, let(Bindings, Body), Ty)
+    :-  foldl(collectBindings, Bindings, Env, Env1)
+    ,   typecheck(Env1, Body, Ty)
+    .
+
+typecheck(Env, app(Items), Ty)
+    :-  maplist(typecheck(Env), Items, [TF | TXs])
+    ,   foldl(merge, TXs, TF, Ty)
+    .
+
+typecheck(Env, X, T)
+    :-  atom(X)
+    ,   member(X - T, Env)
+    .
+
+typecheck(_, X, int)
+    :-  number(X)
+    .
+
+merge(TX, TX -> R, R).
+
+lookup(Env, K, V) :- member(K - V, Env).
+
+collectBindings(bind(Name, Args, Value), Env, [Bind | Env])
+    :-  Bind = Name - T
+    ,   reverse(Args, RArgs)
+    ,   foldl(makeArrow, RArgs, ArgsBindings, R, T)
+    ,   append([[Bind], ArgsBindings, Env], Env1)
+    ,   typecheck(Env1, Value, R)
+    .
+
+makeArrow(A, A - T, In, T -> In).
+
+free(A, A - T).
