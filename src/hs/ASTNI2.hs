@@ -1,18 +1,32 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-import Control.Arrow
 import Control.Monad.State
 import Control.Monad.Reader
 import Control.Monad.Except
 
 import qualified Data.Set as Set
-import           Data.Set   (Set, member, singleton, empty, (\\))
+import           Data.Set   (Set, member, singleton, (\\))
 
 import qualified Data.Map as Map
 import           Data.Map   (Map)
 
 import Data.Monoid ((<>))
+
+import Control.Applicative hiding (Const)
+import Data.Char
+import Text.ParserCombinators.ReadP hiding (get, many)
+
+{-
+    Type inference, adopted from algorithm W (Damas-Milner) and my previous
+    experience.
+-}
+
+{-
+    AST is in the ANF form - allowed constructs are only:
+      - let-bindings (func/value decls)
+      - application of terminals
+-}
 
 data AST
     = Let [Binding] AST
@@ -33,7 +47,7 @@ type Name = String
 data Type
     = Hole Name
     | Ground Name
-    | Type `To` Type
+    | Type :=> Type 
     deriving (Show, Eq)
 
 data QType
@@ -46,10 +60,10 @@ newtype Substitution = Substitution { fromSubstitution :: [(Name, Type)] }
 (=:) :: Name -> Type -> Substitution
 (=:) = curry (Substitution . (:[]))
 
+type Environment = Map Name QType
+
 (=:=) :: Name -> QType -> Environment
 (=:=) = curry (Map.fromList . (:[]))
-
-type Environment = Map Name QType
 
 instance Monoid Substitution where
     mempty = Substitution mempty
@@ -65,15 +79,15 @@ apply (Substitution list) x = foldl (flip applyOne) x list
 
 instance WithTypes Substitution where
     freeTypeVars = mconcat . map (freeTypeVars . snd) . fromSubstitution
-    applyOne s      = Substitution . (s :) . fromSubstitution
+    applyOne s   = Substitution . (s :) . fromSubstitution
 
 instance WithTypes Type where
     freeTypeVars (Hole n)   = singleton n
-    freeTypeVars (d `To` i) = freeTypeVars d <> freeTypeVars i
-    freeTypeVars (Ground _) = empty
+    freeTypeVars (d :=> i)  = freeTypeVars d <> freeTypeVars i
+    freeTypeVars (Ground _) = mempty
 
     (n, t) `applyOne` Hole m | n == m = t
-    s      `applyOne` (dom `To` img)  = applyOne s dom `To` applyOne s img
+    s      `applyOne` (dom :=> img)   = applyOne s dom :=> applyOne s img
     _      `applyOne` other           = other
 
 instance WithTypes AST where
@@ -111,7 +125,7 @@ generalize t = do
 type TypeInference = ExceptT String (ReaderT Environment (State Int))
 
 runTypeInference :: TypeInference a -> Either String a
-runTypeInference = (`evalState` 0) . (`runReaderT` Map.empty) . runExceptT
+runTypeInference = runTypeInferenceKnowing mempty
 
 runTypeInferenceKnowing knowledge 
     = (`evalState` 0)
@@ -119,12 +133,14 @@ runTypeInferenceKnowing knowledge
     . runExceptT
 
 fresh :: TypeInference Type
+-- make a fresh type variable
 fresh = do
     number <- get
     modify (+1)
     return $ Hole (show number <> "?")
 
 instantiate :: QType -> TypeInference Type
+-- generate a fresh binding for each forall-bound variable
 instantiate (Forall names ty) = do
     let names' = Set.toList names
     list <- forM names' $ \name -> do
@@ -134,10 +150,10 @@ instantiate (Forall names ty) = do
     return (apply (Substitution list) ty)
 
 unify :: Type -> Type -> TypeInference Substitution
-unify (a `To` b) (c `To` d) = do
+unify (a :=> b) (c :=> d) = do
     s1 <- unify a c
     s2 <- unify (apply s1 b) (apply s1 d)
-    return (apply s1 s2)
+    return (s1 <> s2)
 
 unify (Hole a) b = bindVar a b
 unify a (Hole b) = bindVar b a
@@ -146,12 +162,18 @@ unify x y = throwError $ show x <> "~/~" <> show y
 
 bindVar :: Name -> Type -> TypeInference Substitution
 bindVar name ty
-    | ty == Hole name = return mempty
+    -- each var is equal to itself
+    | ty == Hole name
+        = return mempty
     | name `member` freeTypeVars ty 
-        = throwError $ "cycle in type: " <> name <> " = " <> show ty
+        = die ["cycle in type: ", name, " = ", show ty]
     | otherwise
         = return (Substitution [(name, ty)])
 
+{-
+    The main interface for typing. For any Inferrable, generate
+    substitutions, type and a new representation.
+-}
 class Inferrable i where
     infer :: i -> TypeInference (Substitution, Type, i)
 
@@ -182,7 +204,7 @@ instance Inferrable AST where
         let sxs        = substs pile
         let (tf : txs) = types  pile
 
-        let tfi = foldl (flip To) tresult txs
+        let tfi = foldl (flip (:=>)) tresult txs
 
         su <- unify tf tfi
 
@@ -233,4 +255,4 @@ instance Inferrable Binding where
         freshTypesForArgs (x : xs) result = do
             (func, bs) <- freshTypesForArgs xs result
             targ       <- fresh
-            return (targ `To` func, x =:= Forall mempty targ <> bs)
+            return (targ :=> func, x =:= Forall mempty targ <> bs)
